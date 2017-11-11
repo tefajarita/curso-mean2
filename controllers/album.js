@@ -10,7 +10,7 @@ var Song = require ('../models/song');
 
 function getAlbum(req , res){
   var albumId = req.params.id;
-  Artist.findById(albumId).populate({path:'artist'}).exec((err,album)=>{
+  Album.findById(albumId).populate({path:'artist'}).exec((err,album)=>{
       if (err) {
         res.status(200).send({
           message:'Error en la petición'
@@ -33,55 +33,38 @@ function getAlbum(req , res){
 }
 
 function getAlbums(req,res){
-    if (req.params.page) {
-      var page = req.params.page;
-    } else {
-      var page = 1;
-    }
- q
-
-    var itemPerPage =3;
-    Artist.find().sort('name').paginate(page, itemPerPage, function(err, albums, total){
-      if (err) {
-        res.status(500).send({
-          message:'Error en la petición'
-        });
-      } else {
-          if (!albums) {
-            res.status(404).send({
-              message:'No ahì artistas'
-            });
-          } else {
-            res.status(200).send({
-              totalElementos:total,
-              albums:albums
-            });
-
-          }
-      }
-    });
+  var artistId = req.params.artistId;
+  if (!albumId) {
+    //sacar todos los artistas de la base de datos
+    var find = Album.find({}).sort({path:'year'});
+  } else {
+    //sacar todos los albumnes de un artista en especifico
+    var find = Album.find({artista : artistId}).sort({path:'year'});
+  }
 }
 function saveAlbum (req,res){
-   var artist = new Artist();
+   var album = new Album();
    var params = req.body;
 
-   artist.name = params.name;
-   artist.description = params.description;
-   artist.image = 'null';
+   album.title = params.title;
+   album.description = params.description;
+   album.year = params.year;
+   album.image = 'null';
+   album.artist = params.artist;
 
-   artist.save((err,artistStored) =>{
+   album.save((err,albumStored) =>{
       if (err) {
         res.status(500).send({
-          message:'Error al guardar el artista'
+          message:'Error al guardar el album'
         });
       } else {
-          if (!artistStored) {
+          if (!albumStored) {
             res.status(404).send({
-              message:'El artista no ha sido guardado'
+              message:'El album no ha sido guardado'
             });
           }else{
             res.status(200).send({
-              artist:artistStored
+              album:albumStored
             });
           }
       }
